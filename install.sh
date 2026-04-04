@@ -15,8 +15,6 @@ mkdir -p "${theme_dir}/wal"
 # Download latest tagged files into correct director
 echo "Downloading wal..."
 curl --silent --output "${theme_dir}/wal/color.ini" "${theme_url}/color.ini"
-curl --silent --output "${theme_dir}/wal/user.css" "${theme_url}/user.css"
-curl --silent --output "${theme_dir}/wal/theme.js" "${theme_url}/theme.js"
 echo "Done"
 
 # Apply theme
