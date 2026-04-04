@@ -1,66 +1,91 @@
-(async function wal() {
-	if (!(Spicetify.React && Spicetify.ReactDOM && Spicetify.Config)) {
-		setTimeout(wal, 10);
-		return;
-	}
+(async function pywalify() {
+    // 1. Block until Spicetify loads
+    if (!Spicetify.Platform) {
+        setTimeout(pywalify, 10);
+        return;
+    }
+    console.debug("[Pywalify]: Initializing...");
 
-	const home = process.env.HOME || process.env.USERPROFILE;
+    // 2. Parse the Pywal generated INI file
+    function parseIni(data) {
+        const regex = {
+            section: /^\s*\[\s*([^\]]*)\s*\]\s*$/,
+            param: /^\s*([^=]+?)\s*=\s*(.*?)\s*$/,
+            comment: /^\s*;.*$/
+        };
+        const value = {};
+        let section = null;
 
-	fetch(`file://${home}/.cache/wal/colors.json`)
-		.then(response => response.json())
-		.then(({ colors }) => {
-			const scheme = {
-				"text":               colors.color15,
-				"subtext":            colors.color7,
-				"main":               colors.color0,
-				"main-elevated":      colors.color1,
-				"main-transition":    colors.color0,
-				"highlight":          colors.color5,
-				"highlight-elevated": colors.color13,
-				"sidebar":            colors.color0,
-				"player":             colors.color0,
-				"card":               colors.color0,
-				"shadow":             colors.color8,
-				"selected-row":       colors.color15,
-				"button":             colors.color6,
-				"button-active":      colors.color14,
-				"button-disabled":    colors.color8,
-				"tab-active":         colors.color0,
-				"notification":       "#101010",
-				"notification-error": "#B54548",
-				"misc":               colors.color0,
-				"play-button":        colors.color3,
-				"play-button-active": colors.color11,
-				"progress-fg":        colors.color10,
-				"progress-bg":        colors.color0,
-				"heart":              colors.color12,
-				"pagelink-active":    colors.color3,
-				"radio-btn-active":   colors.color3
-			};
+        data.split(/[\r\n]+/).forEach(line => {
+            if (regex.comment.test(line)) return;
+            if (regex.param.test(line)) {
+                const match = line.match(regex.param);
+                if (match && match.length === 3 && section) {
+                    value[section][match[1]] = match[2].split(";")[0].trim();
+                }
+            } else if (regex.section.test(line)) {
+                const match = line.match(regex.section);
+                if (match) {
+                    value[match[1]] = {};
+                    section = match[1];
+                }
+            }
+        });
+        return value;
+    }
 
-			document.querySelector("style.walScheme")?.remove();
+    // 3. Convert standard hex to Spicetify RGB format
+    function hexToRGB(hex) {
+        if (hex.length === 3) hex = hex.split("").map(char => char + char).join("");
+        const aRgbHex = hex.match(/.{1,2}/g);
+        return `${parseInt(aRgbHex[0], 16)},${parseInt(aRgbHex[1], 16)},${parseInt(aRgbHex[2], 16)}`;
+    }
 
-			const schemeTag = document.createElement("style");
-			schemeTag.classList.add("walScheme");
+    // 4. Inject colors into the DOM dynamically
+    function applyColors(scheme) {
+        const existingScheme = document.querySelector("style.pywalScheme");
+        existingScheme?.remove();
 
-			let injectStr = ":root {";
-			Object.entries(scheme).forEach(([key, val]) => {
-				const hex = val.replace("#", "");
-				injectStr += `--spice-${key}: ${val};`;
-				injectStr += `--spice-rgb-${key}: ${hexToRGB(hex)};`;
-			});
-			injectStr += "}";
+        const schemeTag = document.createElement("style");
+        schemeTag.classList.add("pywalScheme");
+        
+        let injectStr = ":root {\n";
+        Object.keys(scheme).forEach(key => {
+            injectStr += `--spice-${key}: #${scheme[key]};\n`;
+            injectStr += `--spice-rgb-${key}: ${hexToRGB(scheme[key])};\n`;
+        });
+        injectStr += "}";
+        
+        schemeTag.innerHTML = injectStr;
+        document.body.appendChild(schemeTag);
+        console.debug("[Pywalify]: Pywal colors successfully applied.");
+    }
 
-			schemeTag.innerHTML = injectStr;
-			document.body.appendChild(schemeTag);
-		})
-		.catch(error => {
-			console.warn("[wal-Warning]: Failed to load pywal colors:", error);
-		});
+    // 5. Fetch and Apply
+    async function updateTheme() {
+        try {
+            // NOTE: Change this path to point to your local Pywal color.ini 
+            // or the raw GitHub URL if you are fetching it remotely.
+            const response = await fetch("https://raw.githubusercontent.com/ADIOR-enigma/Pywalify/main/color.ini");
+            const iniContent = await response.text();
+            
+            const parsedSchemes = parseIni(iniContent);
+            
+            // Automatically grab the first section in the ini (e.g. [Pywal] or [wal16])
+            const activeSchemeName = Object.keys(parsedSchemes)[0];
+            if (activeSchemeName && parsedSchemes[activeSchemeName]) {
+                applyColors(parsedSchemes[activeSchemeName]);
+            }
+        } catch (error) {
+            console.error("[Pywalify]: Failed to fetch color scheme:", error);
+        }
+    }
 
-	function hexToRGB(hex) {
-		if (hex.length === 3) hex = hex.split("").map(c => c + c).join("");
-		const m = hex.match(/.{1,2}/g);
-		return [parseInt(m[0], 16), parseInt(m[1], 16), parseInt(m[2], 16)];
-	}
+    // Run the update
+    updateTheme();
+
+    // OPTIONAL: If Pywal changes wallpapers frequently, uncomment below 
+    // to silently check for new colors every 10 seconds without reloading Spotify.
+    // setInterval(updateTheme, 10000); 
+
 })();
