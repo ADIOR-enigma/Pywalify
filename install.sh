@@ -3,7 +3,7 @@
 set -e
 
 # Download URL
-theme_url="https://raw.githubusercontent.com/Comfy-Themes/Spicetify/main/Comfy"
+theme_url="https://raw.githubusercontent.com/ADIOR-enigma/Pywalify/main"
 
 # Setup directories to download to
 spice_dir="$(dirname "$(spicetify -c)")"
