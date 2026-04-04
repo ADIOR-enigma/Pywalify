@@ -1,0 +1,12 @@
+@import url("https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&display=swap");
+
+* {
+  font-family: "Geist mono", monospace !important;
+}
+
+/* Removing gradients */
+.main-entityHeader-backgroundColor,
+.main-actionBarBackground-background {
+  background-color: unset !important;
+  background-image: none;
+}
