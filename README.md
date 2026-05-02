@@ -14,6 +14,7 @@
 - Creates the wal theme folder in your Spicetify Themes directory
 - Sets Spicetify’s current theme to wal
 - Configures CSS injection and applies the theme
+- Works best of the recommended Shell Script by Spicetify
 > [!Note]
 > It will show `error  Cannot open file $HOME/.config/spicetify/Themes/wal/color.ini`, cause the matugen still havent generated a theme for spotify.
 >
