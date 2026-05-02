@@ -2,9 +2,19 @@
 input_path = '~/.config/matugen/templates/spotify-colors.ini'
 output_path = '~/.config/matugen/generated/spotify-colors.ini'
 post_hook = '''
-if command -v spicetify >/dev/null 2>&1 && [ -d "$HOME/.config/spicetify/Themes/wal" ]; then
- 	ln -nfs "$HOME/.config/matugen/generated/spotify-colors.ini" "$HOME/.config/spicetify/Themes/wal/color.ini"
- 	spicetify apply -n || :
- 	hyprctl dispatch sendshortcut "CTRL SHIFT, R, class:^(spotify)$" || :
-fi
+    #!/usr/bin/env bash
+
+    set -e
+
+    SPICETIFY="/home/adior/.spicetify/spicetify"
+
+    SPICE_DIR="$($SPICETIFY -c | xargs dirname)"
+    THEME_DIR="$SPICE_DIR/Themes/wal"
+
+    mkdir -p "$THEME_DIR"
+
+    ln -nfs "$HOME/.config/matugen/generated/spotify-colors.ini" \
+        "$THEME_DIR/color.ini"
+
+    $SPICETIFY apply -n && hyprctl dispatch sendshortcut "CTRL SHIFT, R, class:^(Spotify)$" || :
 '''
