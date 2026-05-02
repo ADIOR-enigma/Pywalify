@@ -15,4 +15,5 @@ spicetify config current_theme wal color_scheme wal
 spicetify config inject_css 1
 spicetify apply
 
+ln -nfs "$HOME/.config/matugen/generated/spotify-colors.ini" "$HOME/.config/spicetify/Themes/wal/color.ini
 echo "Wal theme created"
