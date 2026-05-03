@@ -2,19 +2,25 @@
 input_path = '~/.config/matugen/templates/spotify-colors.ini'
 output_path = '~/.config/matugen/generated/spotify-colors.ini'
 post_hook = '''
-    #!/usr/bin/env bash
+#!/usr/bin/env bash
 
-    set -e
+SOURCE="$HOME/.config/matugen/generated/spotify-colors.ini"
+TARGET="$HOME/.config/spicetify/Themes/wal/color.ini"
+HASH="$HOME/.cache/spotify-colors.hash"
+SPICETIFY="$HOME/.spicetify/spicetify"
 
-    SPICETIFY="/home/adior/.spicetify/spicetify"
+mkdir -p "$(dirname "$HASH")"
 
-    SPICE_DIR="$($SPICETIFY -c | xargs dirname)"
-    THEME_DIR="$SPICE_DIR/Themes/wal"
+NEST=$(sha1sum "$SOURCE")
 
-    mkdir -p "$THEME_DIR"
+# Skip if unchanged
+[[ -f "$HASH" && "$NEST" == "$(<"$HASH")" ]] && exit 0
+echo "$NEST" > "$HASH"
 
-    ln -nfs "$HOME/.config/matugen/generated/spotify-colors.ini" \
-        "$THEME_DIR/color.ini"
-
-    $SPICETIFY apply -n && hyprctl dispatch sendshortcut "CTRL SHIFT, R, class:^(Spotify)$" || :
+(
+  mkdir -p "$(dirname "$TARGET")"
+  ln -nfs "$SOURCE" "$TARGET"
+  "$SPICETIFY" apply -n -q
+  hyprctl dispatch sendshortcut "CTRL SHIFT, R, class:^(Spotify)$"
+) >/dev/null 2>&1 &
 '''
