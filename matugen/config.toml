@@ -8,8 +8,8 @@ THEME_DIR="$HOME/.config/spicetify/Themes/wal"
 if [ -x "$SPICETIFY" ] && [ -d "$THEME_DIR" ]; then
 (
   ln -nfs "$HOME/.config/matugen/generated/spotify-colors.ini" "$THEME_DIR/color.ini"
-  "$SPICETIFY" apply -n -q
-  hyprctl dispatch sendshortcut "CTRL SHIFT, R, class:^(Spotify)$"
+  "$SPICETIFY" apply -n
+  hyprctl dispatch 'hl.dsp.send_shortcut({ mods = "CTRL SHIFT", key = "R", window = "class:^(Spotify)$" })'
 ) >/dev/null 2>&1 &
 fi
 '''
