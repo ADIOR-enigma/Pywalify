@@ -1,4 +1,4 @@
-[templates.spicetify]
+[templates.spice_tify]
 input_path = '~/.config/matugen/templates/spotify-colors.ini'
 output_path = '~/.config/matugen/generated/spotify-colors.ini'
 post_hook = '''
